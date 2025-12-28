@@ -1,3 +1,2 @@
-console.log("Executed.");
-
-const person: string = "Martin";
+import dotenv from "dotenv";
+dotenv.config();
