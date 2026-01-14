@@ -6,13 +6,14 @@ const memberSchema = new Schema(
   {
     memberType: {
       type: String,
-      enum: MemberType,
+      enum: Object.values(MemberType),
       default: MemberType.USER,
     },
 
     memberStatus: {
       type: String,
-      enum: MemberStatus,
+      enum: Object.values(MemberStatus),
+      default: MemberStatus.ACTIVE,
     },
 
     memberNick: {
