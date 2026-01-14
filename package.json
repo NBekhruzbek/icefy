@@ -12,6 +12,7 @@
   "author": "Bekhruzbek",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "dotenv": "^16.0.0",
     "ejs": "^3.1.10",
     "express": "^4.22.1",
@@ -21,6 +22,7 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/express": "^5.0.6",
     "@types/morgan": "^1.9.10",
     "nodemon": "^3.0.2",
