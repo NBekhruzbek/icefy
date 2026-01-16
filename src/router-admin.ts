@@ -13,6 +13,7 @@ routerAdmin
   .get("/signup", adminController.getSignup)
   .post("/signup", adminController.processSignup);
 
+routerAdmin.get("/logout", adminController.logout);
 routerAdmin.get("/check-me", adminController.checkAuthSession);
 
 /** PRODUCT */
