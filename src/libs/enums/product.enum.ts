@@ -3,6 +3,7 @@ export enum ProductCategory {
   PREMIUM = "PREMIUM",
   LIMITED = "LIMITED",
   KIDS = "KIDS",
+  OTHER = "OTHER",
 }
 
 export enum ProductFlavor {

@@ -21,19 +21,16 @@ const productSchema = new Schema(
 
     productDesc: {
       type: String,
-      required: true,
     },
 
     productCategory: {
       type: String,
       enum: ProductCategory,
-      required: true,
     },
 
     productFlavor: {
       type: String,
       enum: ProductFlavor,
-      required: true,
     },
 
     productSize: {
@@ -49,9 +46,15 @@ const productSchema = new Schema(
 
     discountPercent: {
       type: Number,
+      min: 0,
+      max: 100,
     },
 
     discountPrice: {
+      type: Number,
+    },
+
+    priceAfterDiscount: {
       type: Number,
     },
 
