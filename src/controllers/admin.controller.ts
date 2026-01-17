@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { T } from "../libs/types/common";
 import MemberService from "../models/Member.service";
 import { AdminRequest, LoginInput, MemberInput } from "../libs/types/member";
@@ -56,7 +56,7 @@ adminController.processSignup = async (req: AdminRequest, res: Response) => {
     const message =
       err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
     res.send(
-      `<script> alert("HI, ${message}"); window.location.replace("/admin/signup") </script>`
+      `<script> alert("HI, ${message}"); window.location.replace("/admin/signup") </script>`,
     );
   }
 };
@@ -77,7 +77,7 @@ adminController.processLogin = async (req: AdminRequest, res: Response) => {
     const message =
       err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
     res.send(
-      `<script> alert("HI, ${message}"); window.location.replace("/admin/login") </script>`
+      `<script> alert("HI, ${message}"); window.location.replace("/admin/login") </script>`,
     );
   }
 };
@@ -99,12 +99,28 @@ adminController.checkAuthSession = async (req: AdminRequest, res: Response) => {
     console.log("checkAuthSession");
     if (req.session?.member) {
       res.send(
-        `<script> alert("HI, ${req.session.member.memberNick}")</script>`
+        `<script> alert("HI, ${req.session.member.memberNick}")</script>`,
       );
     } else res.send(`<script> alert("${Message.NOT_AUTHENTICATED}")</script>`);
   } catch (err) {
     console.log("ERROR, checkAuthSession!", err);
     res.send(err);
+  }
+};
+
+adminController.verifyAdmin = (
+  req: AdminRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (req.session?.member?.memberType === MemberType.ADMIN) {
+    req.member = req.session.member;
+    next();
+  } else {
+    const message = Message.NOT_AUTHENTICATED;
+    res.send(
+      `<script> alert("${message}"); window.location.replace("/admin/login"); </script>`,
+    );
   }
 };
 
