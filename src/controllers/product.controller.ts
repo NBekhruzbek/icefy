@@ -3,7 +3,7 @@ import { T } from "../libs/types/common";
 import { Request, Response } from "express";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import { AdminRequest } from "../libs/types/member";
-import { ProductInput } from "../libs/types/product";
+import { ProductInput, ProducUpdatetInput } from "../libs/types/product";
 
 const productService = new ProductService();
 
@@ -52,14 +52,29 @@ productController.createNewProduct = async (
   }
 };
 
-productController.updateChosenProduct = async (req: Request, res: Response) => {
+productController.updateChosenProduct = async (
+  req: AdminRequest,
+  res: Response,
+) => {
   try {
     console.log("updateChosenProduct");
-    res.send("DONE!");
+
+    const id = req.params.id;
+
+    const data: ProductInput = req.body;
+    data.productImages = req.files?.map((ele) => {
+      return ele.path.replace(/\\/g, "/");
+    });
+    const result = await productService.updateChosenProduct(id, req.body);
+
+    res.status(HttpCode.OK).json({ data: result });
   } catch (err) {
     console.log("ERROR, updateChosenProduct", err);
-    if (err instanceof Errors) res.status(err.code).json(err);
-    else res.status(Errors.standard.code).json(Errors.standard);
+    const message =
+      err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
+    res.send(
+      `<script> alert("${message}"); window.location.replace("/admin/product/all") </script>`,
+    );
   }
 };
 

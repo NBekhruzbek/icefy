@@ -50,10 +50,6 @@ const productSchema = new Schema(
       max: 100,
     },
 
-    discountPrice: {
-      type: Number,
-    },
-
     priceAfterDiscount: {
       type: Number,
     },

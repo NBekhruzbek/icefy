@@ -16,7 +16,6 @@ export interface Product {
   productSize: ProductSize;
   productPrice: number;
   discountPercent?: number;
-  discountPrice?: number;
   priceAfterDiscount?: number;
   productLeftCount: number;
   productImages?: string[];
@@ -32,8 +31,22 @@ export interface ProductInput {
   productSize?: ProductSize;
   productPrice: number;
   discountPercent?: number;
-  discountPrice?: number;
   priceAfterDiscount?: number;
   productLeftCount: number;
+  productImages?: string[];
+}
+
+export interface ProducUpdatetInput {
+  _id: ObjectId;
+  productStatus?: ProductStatus;
+  productName?: string;
+  productDesc?: string;
+  productCategory?: ProductCategory;
+  productFlavor?: ProductFlavor;
+  productSize?: ProductSize;
+  productPrice?: number;
+  discountPercent?: number;
+  priceAfterDiscount?: number;
+  productLeftCount?: number;
   productImages?: string[];
 }
