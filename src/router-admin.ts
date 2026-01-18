@@ -48,4 +48,10 @@ routerAdmin.get(
   adminController.getUsers,
 );
 
+routerAdmin.post(
+  "/user/edit",
+  adminController.verifyAdmin,
+  adminController.updateChosenUser,
+);
+
 export default routerAdmin;

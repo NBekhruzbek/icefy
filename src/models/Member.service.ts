@@ -1,8 +1,14 @@
 import MemberModel from "../schema/Member.model";
-import { LoginInput, Member, MemberInput } from "../libs/types/member";
+import {
+  LoginInput,
+  Member,
+  MemberInput,
+  MemberUpdateInput,
+} from "../libs/types/member";
 import { MemberType } from "../libs/enums/member.enum";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import * as bcrypt from "bcryptjs";
+import { ObjectId } from "mongoose";
 
 class MemberService {
   private readonly memberModel;
@@ -106,6 +112,17 @@ class MemberService {
       throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
 
     return result as unknown as Member[];
+  }
+
+  public async updateChosenUser(
+    memberId: ObjectId,
+    input: MemberUpdateInput,
+  ): Promise<Member> {
+    const result = await this.memberModel
+      .findByIdAndUpdate({ _id: memberId }, input, { new: true })
+      .exec();
+    if (!result) throw new Errors(HttpCode.NOT_MODIFIED, Message.UPDATE_FAILED);
+    return result as Member;
   }
 }
 

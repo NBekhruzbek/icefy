@@ -4,6 +4,7 @@ import MemberService from "../models/Member.service";
 import { AdminRequest, LoginInput, MemberInput } from "../libs/types/member";
 import { MemberType } from "../libs/enums/member.enum";
 import Errors, { HttpCode, Message } from "../libs/Errors";
+import { shapeIntoMongooseObjectId } from "../libs/config";
 
 const memberService = new MemberService();
 
@@ -107,6 +108,17 @@ adminController.getUsers = async (req: Request, res: Response) => {
   } catch (err) {
     console.log("ERROR, getUsers", err);
     res.redirect("/admin/login");
+  }
+};
+
+adminController.updateChosenUser = async (req: Request, res: Response) => {
+  try {
+    console.log("updateChosenUser");
+    const _id = shapeIntoMongooseObjectId(req.body?._id);
+    const result = await memberService.updateChosenUser(_id, req.body);
+    res.status(HttpCode.OK).json({ memberData: result });
+  } catch (err) {
+    console.log("ERROR, updateChosenUser", err);
   }
 };
 
