@@ -99,6 +99,17 @@ adminController.logout = (req: AdminRequest, res: Response) => {
   }
 };
 
+adminController.getUsers = async (req: Request, res: Response) => {
+  try {
+    console.log("getUsers");
+    const result = await memberService.getUsers();
+    res.render("users", { users: result });
+  } catch (err) {
+    console.log("ERROR, getUsers", err);
+    res.redirect("/admin/login");
+  }
+};
+
 adminController.checkAuthSession = async (req: AdminRequest, res: Response) => {
   try {
     console.log("checkAuthSession");

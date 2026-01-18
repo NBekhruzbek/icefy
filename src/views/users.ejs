@@ -1,5 +1,8 @@
 <%- include('includes/header') %>
 <body>
   <div>USERS PAGE!</div>
+  <% users.map((value, key) => { %>
+    <p><%= value.memberNick %> - <%= value.memberType%></p>
+  <% }) %>
 </body>
 <%- include('includes/footer') %>

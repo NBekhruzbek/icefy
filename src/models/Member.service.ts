@@ -31,14 +31,14 @@ class MemberService {
     const member = await this.memberModel
       .findOne(
         { memberNick: input.memberNick },
-        { memberNick: 1, memberPassword: 1 }
+        { memberNick: 1, memberPassword: 1 },
       )
       .exec();
     if (!member) throw new Errors(HttpCode.NOT_FOUND, Message.NO_MEMBER_NICK);
 
     const isMatch = await bcrypt.compare(
       input.memberPassword,
-      member.memberPassword as string
+      member.memberPassword as string,
     );
     if (!isMatch)
       throw new Errors(HttpCode.UNAUTHORIZED, Message.WRONG_PASSWORD);
@@ -79,14 +79,14 @@ class MemberService {
     const member = await this.memberModel
       .findOne(
         { memberNick: input.memberNick },
-        { memberNick: 1, memberPassword: 1 }
+        { memberNick: 1, memberPassword: 1 },
       )
       .exec();
     if (!member) throw new Errors(HttpCode.NOT_FOUND, Message.NO_MEMBER_NICK);
 
     const isMatch = await bcrypt.compare(
       input.memberPassword,
-      member.memberPassword as string
+      member.memberPassword as string,
     );
     if (!isMatch)
       throw new Errors(HttpCode.UNAUTHORIZED, Message.WRONG_PASSWORD);
@@ -96,6 +96,16 @@ class MemberService {
       throw new Errors(HttpCode.NOT_FOUND, Message.NO_MEMBER_NICK);
 
     return fullMember as Member;
+  }
+
+  public async getUsers(): Promise<Member[]> {
+    const result = await this.memberModel
+      .find({ memberType: MemberType.USER })
+      .exec();
+    if (!result.length)
+      throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+
+    return result as unknown as Member[];
   }
 }
 
