@@ -1,5 +1,54 @@
 <%- include('includes/header') %>
+
+<link rel="stylesheet" type="text/css" href="/css/login.css" />
+
 <body>
-  <div>LOGIN PAGE!</div>
+  <form class="login-container" action="/admin/login" METHOD="POST">
+    <!-- Video Container -->
+    <div class="video-container">
+      <video autoplay muted loop playsinline class="login-video">
+        <source src="/videos/login-video.mp4" type="video/mp4" />
+        Your browser doesn't support the video tag.
+      </video>
+    </div>
+
+    <!-- Login Frame -->
+    <div class="login-frame">
+      <div class="login-top">
+        <span>Enter</span>
+        <div>Go back <a href="/admin" style="color: #ff69b4">Home</a></div>
+        <p>
+          Not registered yet?
+          <a href="/admin/signup" style="color: #ff69b4">Signup</a>
+        </p>
+      </div>
+      <div class="login-input-frame">
+        <div class="login-input-container">
+          <label>Admin Name *</label>
+          <input
+            type="text"
+            name="memberNick"
+            class="member-nick"
+            placeholder="Admin name"
+            value=""
+            required
+          />
+        </div>
+        <div class="login-input-container">
+          <label>Password *</label>
+          <input
+            type="password"
+            name="memberPassword"
+            class="member-password"
+            placeholder="Password"
+            value=""
+            required
+          />
+        </div>
+      </div>
+      <button class="login-btn btn" name="login" type="submit">Login</button>
+    </div>
+  </form>
 </body>
+
 <%- include('includes/footer') %>

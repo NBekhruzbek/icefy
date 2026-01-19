@@ -1,10 +1,1158 @@
 <%- include('includes/header') %>
-<body>
-  <div>PRODUCTS PAGE!</div>
-  <div><%= member.memberNick %></div>
 
-  <% products.map((value, key) => { %>
-    <p><%= value.productName %> - <%= value.productSize %></p>
-  <% }) %>
+<link rel="stylesheet" type="text/css" href="/css/products.css" />
+
+<body>
+  <div class="products-container">
+    <!-- Navigation Menu -->
+    <div class="navigation-menu">
+      <ul class="nav justify-content-center">
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="/admin/product/all">Products</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/user/all">Users</a>
+        </li>
+        <li class="nav-item user-profile-item">
+          <div class="profile-wrapper">
+            <img
+              src="/<%= member.memberImage %>"
+              alt="User Profile"
+              class="profile-image"
+              id="profileToggle"
+            />
+            <div class="profile-dropdown" id="profileDropdown">
+              <div class="dropdown-header">
+                <img
+                  src="/<%= member.memberImage %>"
+                  alt="User Profile"
+                  class="dropdown-image"
+                />
+                <div class="user-info">
+                  <p class="user-name"><%= member.memberNick %></p>
+                  <p class="user-phone"><%= member.memberPhone %></p>
+                </div>
+              </div>
+              <div class="dropdown-divider"></div>
+              <a
+                href="/admin/logout"
+                class="dropdown-item logout-item"
+                onclick="return confirm('Do you really want to logout?');"
+              >
+                <span class="logout-icon">🚪</span>
+                <span class="logout-text">Logout</span>
+              </a>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="restaurant-menu-frame">
+      <div class="board">
+        <!-- Products Table Section -->
+        <div class="dishes-table">
+          <div class="section-header">
+            <h2 class="new-dish-txt">Restaurant Menu</h2>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="table table-hover">
+              <thead class="thead-light">
+                <tr>
+                  <th scope="col">No</th>
+                  <th scope="col">Product Name</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Volume</th>
+                  <th scope="col">Price</th>
+                  <th scope="col">Stock</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>
+                    <span class="product-name-cell">Chocolate Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-premium">Premium</span>
+                  </td>
+                  <td>Chocolate</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$8.99</span>
+                      <span class="discount-badge">-15%</span>
+                      <span class="final-price">$7.64</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">100</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>
+                    <span class="product-name-cell">Vanilla Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-classic">Classic</span>
+                  </td>
+                  <td>Vanilla</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$7.99</span>
+                      <span class="discount-badge">-10%</span>
+                      <span class="final-price">$7.19</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">80</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>
+                    <span class="product-name-cell">Strawberry Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-limited">Limited</span>
+                  </td>
+                  <td>Strawberry</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$9.99</span>
+                      <span class="discount-badge">-20%</span>
+                      <span class="final-price">$7.99</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">120</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>
+                    <span class="product-name-cell">Vanilla Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-classic">Classic</span>
+                  </td>
+                  <td>Vanilla</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$7.99</span>
+                      <span class="discount-badge">-10%</span>
+                      <span class="final-price">$7.19</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">80</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>
+                    <span class="product-name-cell">Strawberry Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-limited">Limited</span>
+                  </td>
+                  <td>Strawberry</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$9.99</span>
+                      <span class="discount-badge">-20%</span>
+                      <span class="final-price">$7.99</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">120</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>
+                    <span class="product-name-cell">Vanilla Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-classic">Classic</span>
+                  </td>
+                  <td>Vanilla</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$7.99</span>
+                      <span class="discount-badge">-10%</span>
+                      <span class="final-price">$7.19</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">80</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>
+                    <span class="product-name-cell">Strawberry Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-limited">Limited</span>
+                  </td>
+                  <td>Strawberry</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$9.99</span>
+                      <span class="discount-badge">-20%</span>
+                      <span class="final-price">$7.99</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">120</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>
+                    <span class="product-name-cell">Vanilla Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-classic">Classic</span>
+                  </td>
+                  <td>Vanilla</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$7.99</span>
+                      <span class="discount-badge">-10%</span>
+                      <span class="final-price">$7.19</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">80</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>
+                    <span class="product-name-cell">Strawberry Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-limited">Limited</span>
+                  </td>
+                  <td>Strawberry</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$9.99</span>
+                      <span class="discount-badge">-20%</span>
+                      <span class="final-price">$7.99</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">120</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>
+                    <span class="product-name-cell">Vanilla Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-classic">Classic</span>
+                  </td>
+                  <td>Vanilla</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$7.99</span>
+                      <span class="discount-badge">-10%</span>
+                      <span class="final-price">$7.19</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">80</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>
+                    <span class="product-name-cell">Strawberry Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-limited">Limited</span>
+                  </td>
+                  <td>Strawberry</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$9.99</span>
+                      <span class="discount-badge">-20%</span>
+                      <span class="final-price">$7.99</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">120</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>
+                    <span class="product-name-cell">Vanilla Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-classic">Classic</span>
+                  </td>
+                  <td>Vanilla</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$7.99</span>
+                      <span class="discount-badge">-10%</span>
+                      <span class="final-price">$7.19</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">80</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>
+                    <span class="product-name-cell">Strawberry Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-limited">Limited</span>
+                  </td>
+                  <td>Strawberry</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$9.99</span>
+                      <span class="discount-badge">-20%</span>
+                      <span class="final-price">$7.99</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">120</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>
+                    <span class="product-name-cell">Vanilla Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-classic">Classic</span>
+                  </td>
+                  <td>Vanilla</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$7.99</span>
+                      <span class="discount-badge">-10%</span>
+                      <span class="final-price">$7.19</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">80</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>
+                    <span class="product-name-cell">Strawberry Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-limited">Limited</span>
+                  </td>
+                  <td>Strawberry</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$9.99</span>
+                      <span class="discount-badge">-20%</span>
+                      <span class="final-price">$7.99</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">120</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>
+                    <span class="product-name-cell">Vanilla Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-classic">Classic</span>
+                  </td>
+                  <td>Vanilla</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$7.99</span>
+                      <span class="discount-badge">-10%</span>
+                      <span class="final-price">$7.19</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">80</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>
+                    <span class="product-name-cell">Strawberry Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-limited">Limited</span>
+                  </td>
+                  <td>Strawberry</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$9.99</span>
+                      <span class="discount-badge">-20%</span>
+                      <span class="final-price">$7.99</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">120</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>
+                    <span class="product-name-cell">Vanilla Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-classic">Classic</span>
+                  </td>
+                  <td>Vanilla</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$7.99</span>
+                      <span class="discount-badge">-10%</span>
+                      <span class="final-price">$7.19</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">80</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>
+                    <span class="product-name-cell">Strawberry Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-limited">Limited</span>
+                  </td>
+                  <td>Strawberry</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$9.99</span>
+                      <span class="discount-badge">-20%</span>
+                      <span class="final-price">$7.99</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">120</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>
+                    <span class="product-name-cell">Vanilla Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-classic">Classic</span>
+                  </td>
+                  <td>Vanilla</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$7.99</span>
+                      <span class="discount-badge">-10%</span>
+                      <span class="final-price">$7.19</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">80</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>
+                    <span class="product-name-cell">Strawberry Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-limited">Limited</span>
+                  </td>
+                  <td>Strawberry</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$9.99</span>
+                      <span class="discount-badge">-20%</span>
+                      <span class="final-price">$7.99</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">120</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>
+                    <span class="product-name-cell">Vanilla Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-classic">Classic</span>
+                  </td>
+                  <td>Vanilla</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$7.99</span>
+                      <span class="discount-badge">-10%</span>
+                      <span class="final-price">$7.19</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">80</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>
+                    <span class="product-name-cell">Strawberry Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-limited">Limited</span>
+                  </td>
+                  <td>Strawberry</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$9.99</span>
+                      <span class="discount-badge">-20%</span>
+                      <span class="final-price">$7.99</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">120</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>
+                    <span class="product-name-cell">Vanilla Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-classic">Classic</span>
+                  </td>
+                  <td>Vanilla</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$7.99</span>
+                      <span class="discount-badge">-10%</span>
+                      <span class="final-price">$7.19</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">80</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>
+                    <span class="product-name-cell">Strawberry Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-limited">Limited</span>
+                  </td>
+                  <td>Strawberry</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$9.99</span>
+                      <span class="discount-badge">-20%</span>
+                      <span class="final-price">$7.99</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">120</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>
+                    <span class="product-name-cell">Vanilla Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-classic">Classic</span>
+                  </td>
+                  <td>Vanilla</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$7.99</span>
+                      <span class="discount-badge">-10%</span>
+                      <span class="final-price">$7.19</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">80</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>
+                    <span class="product-name-cell">Strawberry Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-limited">Limited</span>
+                  </td>
+                  <td>Strawberry</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$9.99</span>
+                      <span class="discount-badge">-20%</span>
+                      <span class="final-price">$7.99</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">120</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>
+                    <span class="product-name-cell">Vanilla Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-classic">Classic</span>
+                  </td>
+                  <td>Vanilla</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$7.99</span>
+                      <span class="discount-badge">-10%</span>
+                      <span class="final-price">$7.19</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">80</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>
+                    <span class="product-name-cell">Strawberry Ice Cream</span>
+                  </td>
+                  <td>
+                    <span class="type-badge type-limited">Limited</span>
+                  </td>
+                  <td>Strawberry</td>
+                  <td>
+                    <div class="price-container">
+                      <span class="original-price">$9.99</span>
+                      <span class="discount-badge">-20%</span>
+                      <span class="final-price">$7.99</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="stock-cell">120</span>
+                  </td>
+                  <td>
+                    <select class="spec-select new-product-status">
+                      <option value="PAUSE" selected>PAUSE</option>
+                      <option value="PROCESS">PROCESS</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- New Product Form Section -->
+        <div class="form-section">
+          <div class="section-header">
+            <h2 class="new-dish-txt">Add New Product</h2>
+          </div>
+
+          <form
+            action="/admin/product/create"
+            method="POST"
+            class="dish-container"
+            enctype="multipart/form-data"
+          >
+            <!-- Basic Information -->
+            <div class="form-group">
+              <h3 class="form-group-title">Basic Information</h3>
+
+              <div class="long-input">
+                <label>Product Name *</label>
+                <input
+                  type="text"
+                  placeholder="Enter product name"
+                  name="productName"
+                  class="product-name"
+                  required
+                />
+              </div>
+
+              <div class="long-input">
+                <label>Product Description</label>
+                <textarea
+                  name="productDesc"
+                  class="product-desc"
+                  placeholder="Enter product description..."
+                ></textarea>
+              </div>
+
+              <input
+                name="productStatus"
+                value="PAUSE"
+                class="product-status"
+                hidden
+              />
+            </div>
+
+            <!-- Pricing & Stock -->
+            <div class="form-group">
+              <h3 class="form-group-title">Pricing & Stock</h3>
+
+              <div class="half-input-frame">
+                <div class="half-input">
+                  <label>Original Price ($) *</label>
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    name="productPrice"
+                    class="product-price"
+                    step="0.01"
+                    required
+                  />
+                </div>
+                <div class="half-input">
+                  <label
+                    >Discount (%) <span class="optional">Optional</span></label
+                  >
+                  <input
+                    type="number"
+                    placeholder="0"
+                    name="discountPercent"
+                    class="discount-percent"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                  />
+                </div>
+              </div>
+
+              <div
+                class="discount-preview-box"
+                id="discountPreview"
+                style="display: none"
+              >
+                <div class="discount-preview-item">
+                  <span class="preview-label">Original Price:</span>
+                  <span class="preview-value" id="previewOriginalPrice"
+                    >$0.00</span
+                  >
+                </div>
+                <div class="discount-preview-item">
+                  <span class="preview-label">Discount:</span>
+                  <span class="preview-value discount" id="previewDiscount"
+                    >0%</span
+                  >
+                </div>
+                <div class="discount-preview-item highlight">
+                  <span class="preview-label">Final Price:</span>
+                  <span class="preview-value final" id="previewFinalPrice"
+                    >$0.00</span
+                  >
+                </div>
+              </div>
+
+              <div class="half-input-frame">
+                <div class="half-input">
+                  <label>Stock Count *</label>
+                  <input
+                    type="number"
+                    placeholder="0"
+                    name="productLeftCount"
+                    class="product-left-count"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Product Details -->
+            <div class="form-group">
+              <h3 class="form-group-title">Product Details</h3>
+
+              <div class="half-input-frame">
+                <div class="half-input">
+                  <label>Category *</label>
+                  <select
+                    class="product-category"
+                    name="productCategory"
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    <option value="CLASSIC">Classic</option>
+                    <option value="PREMIUM">Premium</option>
+                    <option value="LIMITED">Limited</option>
+                    <option value="KIDS">Kids</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+
+                <div class="half-input">
+                  <label>Flavor *</label>
+                  <select class="product-flavor" name="productFlavor" required>
+                    <option value="">Select Flavor</option>
+                    <option value="VANILLA">Vanilla</option>
+                    <option value="CHOCOLATE">Chocolate</option>
+                    <option value="STRAWBERRY">Strawberry</option>
+                    <option value="COOKIES_CREAM">Cookies & Cream</option>
+                    <option value="MANGO">Mango</option>
+                    <option value="MATCHA">Matcha</option>
+                    <option value="MINT_CHOCOLATE_CHIP">
+                      Mint Chocolate Chip
+                    </option>
+                    <option value="COFFEE">Coffee</option>
+                    <option value="CARAMEL">Caramel</option>
+                    <option value="YOGURT">Yogurt</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="half-input-frame">
+                <div class="half-input">
+                  <label>Size *</label>
+                  <select class="product-size" name="productSize" required>
+                    <option value="">Select Size</option>
+                    <option value="SMALL">Small</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="LARGE">Large</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product Images -->
+            <div class="form-group">
+              <h3 class="form-group-title">Product Images (Up to 5)</h3>
+
+              <div class="img-frame">
+                <div class="media-frame">
+                  <div class="upload-img-box">
+                    <img
+                      src="/img/upload.png"
+                      alt="Upload"
+                      class="upload-placeholder"
+                    />
+                    <input
+                      type="file"
+                      name="productImages"
+                      class="image-input"
+                      required
+                      accept="image/*"
+                    />
+                    <div class="image-preview" style="display: none">
+                      <img class="preview-img" alt="Preview" />
+                    </div>
+                  </div>
+                  <div class="upload-img-box">
+                    <img
+                      src="/img/upload.png"
+                      alt="Upload"
+                      class="upload-placeholder"
+                    />
+                    <input
+                      type="file"
+                      name="productImages"
+                      class="image-input"
+                      accept="image/*"
+                    />
+                    <div class="image-preview" style="display: none">
+                      <img class="preview-img" alt="Preview" />
+                    </div>
+                  </div>
+                  <div class="upload-img-box">
+                    <img
+                      src="/img/upload.png"
+                      alt="Upload"
+                      class="upload-placeholder"
+                    />
+                    <input
+                      type="file"
+                      name="productImages"
+                      class="image-input"
+                      accept="image/*"
+                    />
+                    <div class="image-preview" style="display: none">
+                      <img class="preview-img" alt="Preview" />
+                    </div>
+                  </div>
+                  <div class="upload-img-box">
+                    <img
+                      src="/img/upload.png"
+                      alt="Upload"
+                      class="upload-placeholder"
+                    />
+                    <input
+                      type="file"
+                      name="productImages"
+                      class="image-input"
+                      accept="image/*"
+                    />
+                    <div class="image-preview" style="display: none">
+                      <img class="preview-img" alt="Preview" />
+                    </div>
+                  </div>
+                  <div class="upload-img-box">
+                    <img
+                      src="/img/upload.png"
+                      alt="Upload"
+                      class="upload-placeholder"
+                    />
+                    <input
+                      type="file"
+                      name="productImages"
+                      class="image-input"
+                      accept="image/*"
+                    />
+                    <div class="image-preview" style="display: none">
+                      <img class="preview-img" alt="Preview" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="operation-buttons">
+              <button type="reset" class="btn btn-secondary" id="cancel-btn">
+                <span>Clear Form</span>
+              </button>
+              <button type="submit" class="btn btn-primary" id="create-btn">
+                <span class="checkmark">✓</span> Create Product
+              </button>
+            </div>
+
+            <input name="restaurantId" class="restaurant-id" hidden />
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="/js/products.js"></script>
 </body>
+
 <%- include('includes/footer') %>

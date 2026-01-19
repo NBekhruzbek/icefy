@@ -1,8 +1,102 @@
 <%- include('includes/header') %>
+
+<link rel="stylesheet" type="text/css" href="/css/users.css" />
+
 <body>
-  <div>USERS PAGE!</div>
-  <% users.map((value, key) => { %>
-    <p><%= value.memberNick %> - <%= value.memberType%></p>
-  <% }) %>
+  <div class="users-container">
+    <% if(!member) { %>
+    <div class="navigation-menu">
+      <ul class="nav justify-content-center">
+        <li class="nav-item" style="cursor: pointer">
+          <a class="nav-link active" href="/admin/">Home</a>
+        </li>
+        <li class="nav-item" style="cursor: pointer">
+          <a class="nav-link" href="/admin/signup">SignUp</a>
+        </li>
+        <li class="nav-item" style="cursor: pointer">
+          <a class="nav-link" href="/admin/login">Login</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="users-frame" style="color: #dddddd">
+      <div class="board" style="font-size: 40px">Please login first!</div>
+    </div>
+
+    <% } else { %>
+    <div class="navigation-menu">
+      <ul class="nav justify-content-center">
+        <li class="nav-item" style="cursor: pointer">
+          <a class="nav-link" href="/admin/">Home</a>
+        </li>
+        <li class="nav-item" style="cursor: pointer">
+          <a class="nav-link" href="/admin/product/all">Products</a>
+        </li>
+        <li class="nav-item" style="cursor: pointer">
+          <a class="nav-link active" href="/admin/user/all">Users</a>
+        </li>
+        <li class="nav-item user-profile-item" style="cursor: pointer;" 
+            >
+              <div class="profile-wrapper">
+                <img src="/<%= member.memberImage %>" alt="User Profile" class="profile-image" id="profileToggle">
+                <div class="profile-dropdown" id="profileDropdown">
+                  <div class="dropdown-header">
+                    <img src="/<%= member.memberImage %>" alt="User Profile" class="dropdown-image">
+                    <div class="user-info">
+                      <p class="user-name"><%= member.memberNick %></p>
+                      <p class="user-phone"><%= member.memberPhone %></p>
+                    </div>
+                  </div>
+                  <div class="dropdown-divider"></div>
+                  <a href="/admin/logout" class="dropdown-item logout-item" onclick="return confirm('Do you really want to logout?')">
+                    <span class="logout-icon">🚪</span>
+                    <span class="logout-text">Logout</span>
+                  </a>
+                </div>
+              </div>
+            </li>
+      </ul>
+    </div>
+
+    <div class="users-frame">
+      <div class="board">
+        <div class="user-table">
+          <span class="header-name" style="margin-bottom: 30px"
+            >All Users List</span
+          >
+          <table class="table table-hover table-sm">
+            <thead class="thead-light">
+              <tr class="thead-light">
+                <th scope="col">No</th>
+                <th scope="col">Image</th>
+                <th scope="col">Name</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <!--  LOOP PRODUCTS: START  -->
+            <tbody style="background: white">
+              <td>1</td>
+              <td><img class="user-image" src="/<%= member.memberImage %>" alt=""></td>
+              <td>David</td>
+              <td>821024697878</td>
+              <td style="width: 13%">
+                <select class="spec-select member-status">
+                  <option value="ACTIVE" selected>ACTIVE</option>
+                  <option value="BLOCK">BLOCK</option>
+                  <option value="DELETE">DELETE</option>
+                </select>
+              </td>
+            </tbody>
+            <!--  LOOP PRODUCTS: END  -->
+          </table>
+        </div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+
+  <script type="text/javascript" src="/js/users.js"></script>
 </body>
+
 <%- include('includes/footer') %>

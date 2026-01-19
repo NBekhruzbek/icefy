@@ -1,19 +1,71 @@
 <%- include('includes/header') %>
+
+<link rel="stylesheet" type="text/css" href="/css/home.css" />
+
 <body>
-  <div class="card" style="width: 18rem">
-    <img
-      src="https://cdn.pixabay.com/photo/2018/08/04/11/30/draw-3583548_1280.png"
-      class="card-img-top"
-      alt="..."
-    />
-    <div class="card-body">
-      <h5 class="card-title">Card title</h5>
-      <p class="card-text">
-        Some quick example text to build on the card title and make up the bulk
-        of the card’s content.
-      </p>
-      <a href="#" class="btn btn-primary">Go somewhere</a>
+  <div class="home-container">
+    <div class="video-bg">
+      <div class="navigation-menu">
+        <ul class="nav justify-content-center">
+          <li class="nav-item" style="cursor: pointer">
+            <a class="nav-link active" href="/admin">Home</a>
+          </li>
+          <% if(!member) { %>
+            <li class="nav-item" style="cursor: pointer">
+              <a class="nav-link" href="/admin/signup">Signup</a>
+            </li>
+            <li class="nav-item" style="cursor: pointer">
+              <a class="nav-link" href="/admin/login">Login</a>
+            </li>
+          <% } else { %>
+            <li class="nav-item" style="cursor: pointer">
+              <a class="nav-link" href="/admin/product/all">Products</a>
+            </li>
+            <li class="nav-item" style="cursor: pointer">
+              <a class="nav-link" href="/admin/user/all">Users</a>
+            </li>
+            <li class="nav-item user-profile-item" style="cursor: pointer;" 
+            >
+              <div class="profile-wrapper">
+                <img src="/<%= member.memberImage %>" alt="User Profile" class="profile-image" id="profileToggle">
+                <div class="profile-dropdown" id="profileDropdown">
+                  <div class="dropdown-header">
+                    <img src="/<%= member.memberImage %>" alt="User Profile" class="dropdown-image">
+                    <div class="user-info">
+                      <p class="user-name"><%= member.memberNick %></p>
+                      <p class="user-phone"><%= member.memberPhone %></p>
+                    </div>
+                  </div>
+                  <div class="dropdown-divider"></div>
+                  <a href="/admin/logout" class="dropdown-item logout-item" onclick="return confirm('Do you really want to logout?')">
+                    <span class="logout-icon">🚪</span>
+                    <span class="logout-text">Logout</span>
+                  </a>
+                </div>
+              </div>
+            </li>
+          <% } %>
+        </ul>
+      </div>
+
+      <video autoplay muted loop playsinline id="bgVideo">
+        <source src="/videos/hompage-background.mp4" type="video/mp4" />
+        Your browser doesn't support the video tag.
+      </video>
+
+      <div class="content">
+        <h1>SWEET TREATS with ICEFY</h1>
+        <p>Creamy, Dreamy Ice Cream</p>
+        <button
+          class="icefy-button"
+          onclick="location.href = 'http://localhost:4003'"
+        >
+          Go Icefy Homepage
+        </button>
+      </div>
     </div>
   </div>
+  <script type="text/javascript" src="/js/home.js"></script>
 </body>
+
 <%- include('includes/footer') %>
