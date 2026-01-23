@@ -57,12 +57,35 @@ function setStatusBg(select) {
 // apply on page load
 document.querySelectorAll(".new-product-status").forEach(setStatusBg);
 
+$(".new-product-status").on("change", async function (e) {
+  const id = e.target.id;
+  const productStatus = $(`#${id}.new-product-status`).val();
+  console.log("id:", id);
+  console.log("productStatus: ", productStatus);
+
+  try {
+    const response = await axios.post(`/admin/product/${id}`, {
+      productStatus: productStatus,
+    });
+    console.log("response: ", response);
+    const result = response.data;
+    if (result) {
+      console.log("Product Updated!.");
+      $(".new-product-status").blur();
+    } else {
+      alert("Product update failed!");
+    }
+  } catch (err) {
+    console.log(err);
+    alert("Product update failed!");
+  }
+});
+
 // ---------------------------
 function validateForm() {
   const productName = $(".product-name").val();
   const productDesc = $(".product-desc").val();
   const productPrice = $(".product-price").val();
-  const discountPercent = $(".discount-percent").val();
   const productLeftCount = $(".product-left-count").val();
   const productCategory = $(".product-category").val();
   const productFlavor = $(".product-flavor").val();
@@ -72,7 +95,6 @@ function validateForm() {
     productName === "" ||
     productDesc === "" ||
     productPrice === "" ||
-    discountPercent === "" ||
     productLeftCount === "" ||
     productCategory === "" ||
     productFlavor === "" ||
