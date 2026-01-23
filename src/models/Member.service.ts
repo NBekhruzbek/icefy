@@ -5,7 +5,7 @@ import {
   MemberInput,
   MemberUpdateInput,
 } from "../libs/types/member";
-import { MemberType } from "../libs/enums/member.enum";
+import { MemberStatus, MemberType } from "../libs/enums/member.enum";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import * as bcrypt from "bcryptjs";
 import { ObjectId } from "mongoose";
@@ -36,8 +36,11 @@ class MemberService {
     // TODO: Consider member status later
     const member = await this.memberModel
       .findOne(
-        { memberNick: input.memberNick },
-        { memberNick: 1, memberPassword: 1 },
+        {
+          memberNick: input.memberNick,
+          memberStatus: { $ne: MemberStatus.DELETE }, // $ne = not equal
+        },
+        { memberNick: 1, memberPassword: 1, memberStatus: 1 },
       )
       .exec();
     if (!member) throw new Errors(HttpCode.NOT_FOUND, Message.NO_MEMBER_NICK);
@@ -48,6 +51,9 @@ class MemberService {
     );
     if (!isMatch)
       throw new Errors(HttpCode.UNAUTHORIZED, Message.WRONG_PASSWORD);
+    else if (member.memberStatus === MemberStatus.BLOCK) {
+      throw new Errors(HttpCode.FORBIDDEN, Message.BLOCKED_USER);
+    }
 
     const fullMember = await this.memberModel
       .findById(member._id)
