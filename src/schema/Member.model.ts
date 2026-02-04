@@ -43,6 +43,7 @@ const memberSchema = new Schema(
 
     memberImage: {
       type: String,
+      default: null,
     },
 
     memberPoints: {
