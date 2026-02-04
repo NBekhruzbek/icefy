@@ -50,3 +50,11 @@ export interface ProducUpdatetInput {
   productLeftCount?: number;
   productImages?: string[];
 }
+
+export interface ProductInquiry {
+  order: string;
+  page: number;
+  limit: number;
+  productCategory?: ProductCategory;
+  search?: string;
+}

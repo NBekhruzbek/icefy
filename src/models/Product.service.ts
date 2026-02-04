@@ -1,11 +1,14 @@
+import { T } from "../libs/types/common";
 import { shapeIntoMongooseObjectId } from "../libs/config";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import {
   Product,
   ProductInput,
+  ProductInquiry,
   ProducUpdatetInput,
 } from "../libs/types/product";
 import ProductModel from "../schema/Product.model";
+import { ProductStatus } from "../libs/enums/product.enum";
 
 class ProductService {
   private readonly productModel;
@@ -15,6 +18,29 @@ class ProductService {
   }
 
   /** SPA */
+  public async getProducts(inquiry: ProductInquiry): Promise<Product[]> {
+    const match: T = { productStatus: ProductStatus.PROCESS };
+    if (inquiry.productCategory) {
+      match.productCategory = inquiry.productCategory;
+    }
+    if (inquiry.search) {
+      match.search = inquiry.search;
+    }
+
+    const sort: T =
+      inquiry.order === "productPrice"
+        ? { [inquiry.order]: 1 }
+        : { [inquiry.order]: -1 };
+
+    const result = await this.productModel.aggregate([
+      { $match: match },
+      { $sort: sort },
+      { $skip: (inquiry.page * 1 - 1) * inquiry.limit },
+      { $limit: inquiry.limit * 1 }, // 1ga ko'paytirish orqali raqamga aylantirib olamiz;
+    ]);
+
+    return result;
+  }
 
   /** BSSR */
   public async getAllProducts(): Promise<Product[]> {
