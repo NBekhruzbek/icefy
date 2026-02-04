@@ -1,4 +1,4 @@
-import { ObjectId } from "mongoose";
+import { Types, ObjectId } from "mongoose";
 import {
   ProductCategory,
   ProductFlavor,
@@ -57,4 +57,10 @@ export interface ProductInquiry {
   limit: number;
   productCategory?: ProductCategory;
   search?: string;
+}
+
+export interface StatisticModifier {
+  _id: Types.ObjectId;
+  targetKey: string;
+  modifier: number;
 }

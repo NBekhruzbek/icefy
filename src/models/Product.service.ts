@@ -6,6 +6,7 @@ import {
   ProductInput,
   ProductInquiry,
   ProducUpdatetInput,
+  StatisticModifier,
 } from "../libs/types/product";
 import ProductModel from "../schema/Product.model";
 import { ProductStatus } from "../libs/enums/product.enum";
@@ -88,6 +89,19 @@ class ProductService {
       }
     }
 
+    return result?.toObject() as Product;
+  }
+
+  public async productStatsEditor(input: StatisticModifier): Promise<Product> {
+    const { _id, targetKey, modifier } = input;
+    const result = await this.productModel
+      .findByIdAndUpdate(
+        { _id: _id },
+        { $inc: { [targetKey]: modifier } },
+        { new: true },
+      )
+      .exec();
+    console.log("result", result);
     return result?.toObject() as Product;
   }
 

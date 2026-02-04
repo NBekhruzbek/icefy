@@ -64,6 +64,11 @@ const productSchema = new Schema(
       default: [],
     },
 
+    productLikes: {
+      type: Number,
+      default: 0,
+    },
+
     productViews: {
       type: Number,
       default: 0,
