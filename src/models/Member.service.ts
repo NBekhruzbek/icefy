@@ -9,6 +9,7 @@ import { MemberStatus, MemberType } from "../libs/enums/member.enum";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import * as bcrypt from "bcryptjs";
 import { ObjectId } from "mongoose";
+import { shapeIntoMongooseObjectId } from "../libs/config";
 
 class MemberService {
   private readonly memberModel;
@@ -63,6 +64,17 @@ class MemberService {
       throw new Errors(HttpCode.NOT_FOUND, Message.NO_MEMBER_NICK);
 
     return fullMember as Member;
+  }
+
+  public async getMemberDetail(member: Member): Promise<Member> {
+    const memberId = shapeIntoMongooseObjectId(member._id);
+    const result = await this.memberModel.findOne({
+      _id: memberId,
+      memberStatus: MemberStatus.ACTIVE,
+    });
+    if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+
+    return result as Member;
   }
 
   /** BSSR */
