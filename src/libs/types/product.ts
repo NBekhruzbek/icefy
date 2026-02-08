@@ -20,6 +20,8 @@ export interface Product {
   productLeftCount: number;
   productImages?: string[];
   productViews: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface ProductInput {
