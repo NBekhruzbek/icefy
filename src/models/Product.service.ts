@@ -30,8 +30,11 @@ class ProductService {
     if (inquiry.productCategory) {
       match.productCategory = inquiry.productCategory;
     }
+    if (inquiry.productFlavor) {
+      match.productFlavor = inquiry.productFlavor;
+    }
     if (inquiry.search) {
-      match.search = inquiry.search;
+      match.productName = { $regex: new RegExp(inquiry.search, "i") };
     }
 
     const sort: T =

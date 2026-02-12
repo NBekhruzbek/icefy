@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import { AdminRequest, ExtendedRequest } from "../libs/types/member";
 import { ProductInput, ProductInquiry } from "../libs/types/product";
-import { ProductCategory } from "../libs/enums/product.enum";
+import { ProductCategory, ProductFlavor } from "../libs/enums/product.enum";
 
 const productService = new ProductService();
 
@@ -14,7 +14,8 @@ const productController: T = {};
 productController.getProducts = async (req: Request, res: Response) => {
   try {
     console.log("getProducts");
-    const { order, page, limit, productCategory, search } = req.query;
+    const { order, page, limit, productCategory, productFlavor, search } =
+      req.query;
     const inquiry: ProductInquiry = {
       order: String(order),
       page: Number(page),
@@ -23,6 +24,9 @@ productController.getProducts = async (req: Request, res: Response) => {
 
     if (productCategory) {
       inquiry.productCategory = productCategory as ProductCategory;
+    }
+    if (productFlavor) {
+      inquiry.productFlavor = productFlavor as ProductFlavor;
     }
     if (search) {
       inquiry.search = String(search);

@@ -19,6 +19,7 @@ export interface Product {
   priceAfterDiscount?: number;
   productLeftCount: number;
   productImages?: string[];
+  productLiked?: boolean;
   productViews: number;
   createdAt: Date;
   updatedAt: Date;
@@ -58,6 +59,7 @@ export interface ProductInquiry {
   page: number;
   limit: number;
   productCategory?: ProductCategory;
+  productFlavor?: ProductFlavor;
   search?: string;
 }
 
