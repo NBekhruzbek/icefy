@@ -11,9 +11,10 @@ const productService = new ProductService();
 const productController: T = {};
 
 /** SPA */
-productController.getProducts = async (req: Request, res: Response) => {
+productController.getProducts = async (req: ExtendedRequest, res: Response) => {
   try {
     console.log("getProducts");
+    const memberId = req.member?._id ?? null;
     const { order, page, limit, productCategory, productFlavor, search } =
       req.query;
     const inquiry: ProductInquiry = {
@@ -32,7 +33,7 @@ productController.getProducts = async (req: Request, res: Response) => {
       inquiry.search = String(search);
     }
 
-    const result = await productService.getProducts(inquiry);
+    const result = await productService.getProducts(memberId, inquiry);
 
     res.status(HttpCode.OK).json(result);
   } catch (err) {

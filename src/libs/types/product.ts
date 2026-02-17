@@ -7,7 +7,7 @@ import {
 } from "../enums/product.enum";
 
 export interface Product {
-  _id: ObjectId;
+  _id: Types.ObjectId;
   productStatus: ProductStatus;
   productName: string;
   productDesc?: string;
@@ -19,7 +19,7 @@ export interface Product {
   priceAfterDiscount?: number;
   productLeftCount: number;
   productImages?: string[];
-  productLiked?: boolean;
+  isLiked?: boolean;
   productViews: number;
   createdAt: Date;
   updatedAt: Date;

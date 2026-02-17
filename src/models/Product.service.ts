@@ -14,18 +14,24 @@ import { Types } from "mongoose";
 import { ViewInput } from "../libs/types/view";
 import { ViewGroup } from "../libs/enums/view.enum";
 import ViewService from "./View.service";
+import LikeModel from "../schema/Like.model";
 
 class ProductService {
   private readonly productModel;
+  private readonly likeModel;
   public viewService;
 
   constructor() {
     this.productModel = ProductModel;
+    this.likeModel = LikeModel;
     this.viewService = new ViewService();
   }
 
   /** SPA */
-  public async getProducts(inquiry: ProductInquiry): Promise<Product[]> {
+  public async getProducts(
+    memberId: Types.ObjectId,
+    inquiry: ProductInquiry,
+  ): Promise<Product[]> {
     const match: T = { productStatus: ProductStatus.PROCESS };
     if (inquiry.productCategory) {
       match.productCategory = inquiry.productCategory;
@@ -44,11 +50,39 @@ class ProductService {
 
     const result = await this.productModel.aggregate([
       { $match: match },
+      {
+        $lookup: {
+          from: "likes", // likes collection nomi
+          let: { productId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$likeRefId", "$$productId"] },
+                    { $eq: ["$memberId", { $toObjectId: memberId }] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "memberLike",
+        },
+      },
+      {
+        $addFields: {
+          isLiked: { $gt: [{ $size: "$memberLike" }, 0] },
+        },
+      },
+      {
+        $project: {
+          memberLike: 0, // bu fieldni natijada ko'rsatmaslik
+        },
+      },
       { $sort: sort },
       { $skip: (inquiry.page * 1 - 1) * inquiry.limit },
       { $limit: inquiry.limit * 1 }, // 1ga ko'paytirish orqali raqamga aylantirib olamiz;
     ]);
-
     return result;
   }
 
@@ -57,12 +91,14 @@ class ProductService {
     id: string,
   ): Promise<Product> {
     const productId = shapeIntoMongooseObjectId(id);
+    let isLiked: boolean = false;
 
     let result = await this.productModel
       .findOne({
         _id: productId,
         productStatus: ProductStatus.PROCESS,
       })
+      .lean()
       .exec();
     if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
 
@@ -90,9 +126,24 @@ class ProductService {
           )
           .exec();
       }
+
+      let liked = await this.likeModel
+        .findOne({
+          memberId: memberId,
+          likeRefId: productId,
+        })
+        .lean<Product>()
+        .exec();
+      if (liked) isLiked = true;
+      if (!liked) isLiked = false;
     }
 
-    return result?.toObject() as Product;
+    const finalResult = {
+      ...result,
+      isLiked: isLiked,
+    };
+
+    return finalResult as Product;
   }
 
   public async productStatsEditor(input: StatisticModifier): Promise<Product> {
@@ -104,7 +155,6 @@ class ProductService {
         { new: true },
       )
       .exec();
-    console.log("result", result);
     return result?.toObject() as Product;
   }
 

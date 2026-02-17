@@ -4,6 +4,7 @@ import LikeModel from "../schema/Like.model";
 import { HttpCode, Message } from "../libs/Errors";
 import ProductModel from "../schema/Product.model";
 import ProductService from "./Product.service";
+import { Types } from "mongoose";
 
 class LikeService {
   private readonly likeModel;
@@ -52,6 +53,26 @@ class LikeService {
       }
     } catch (err) {
       console.log("ERROR, model:deleteMemberLike:", err);
+      throw new Errors(HttpCode.BAD_REQUEST, Message.SOMETHING_WENT_WRONG);
+    }
+  }
+
+  public async checkMemberLiked(
+    memberId: Types.ObjectId,
+    productId: Types.ObjectId,
+  ): Promise<boolean> {
+    try {
+      const result = await this.likeModel
+        .findOne({
+          memberId: memberId,
+          likeRefId: productId,
+        })
+        .lean()
+        .exec();
+      if (result) return true;
+      else return false;
+    } catch (err) {
+      console.log("ERROR, model:checkMemberLiked:", err);
       throw new Errors(HttpCode.BAD_REQUEST, Message.SOMETHING_WENT_WRONG);
     }
   }
