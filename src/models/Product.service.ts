@@ -2,6 +2,7 @@ import { T } from "../libs/types/common";
 import { shapeIntoMongooseObjectId } from "../libs/config";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import {
+  LikedProductInquiry,
   Product,
   ProductInput,
   ProductInquiry,
@@ -10,7 +11,7 @@ import {
 } from "../libs/types/product";
 import ProductModel from "../schema/Product.model";
 import { ProductStatus } from "../libs/enums/product.enum";
-import { Types } from "mongoose";
+import { ObjectId, Types } from "mongoose";
 import { ViewInput } from "../libs/types/view";
 import { ViewGroup } from "../libs/enums/view.enum";
 import ViewService from "./View.service";
@@ -211,6 +212,48 @@ class ProductService {
     if (!result) throw new Errors(HttpCode.NOT_MODIFIED, Message.UPDATE_FAILED);
 
     return result.toObject() as Product;
+  }
+
+  public async getLikedProducts(
+    memberId: Types.ObjectId,
+    inquiry: LikedProductInquiry,
+  ): Promise<Product[]> {
+    try {
+      const result = await this.likeModel.aggregate([
+        {
+          $match: {
+            memberId: new Types.ObjectId(memberId),
+            likeGroup: "PRODUCT",
+          },
+        },
+        {
+          $lookup: {
+            from: "products", // products collection nomi
+            localField: "likeRefId", // likes ichidagi product id
+            foreignField: "_id", // products ichidagi _id
+            as: "product",
+          },
+        },
+        {
+          $unwind: "$product", // arrayni oddiy objectga aylantiradi
+        },
+        {
+          $addFields: {
+            "product.isLiked": true,
+          },
+        },
+        {
+          $replaceRoot: { newRoot: "$product" }, // faqat productni qaytaradi
+        },
+        { $skip: (inquiry.page - 1) * inquiry.limit },
+        { $limit: inquiry.limit },
+      ]);
+
+      return result;
+    } catch (err) {
+      console.log("ERROR, model: getLikedProducts", err);
+      throw new Errors(HttpCode.BAD_REQUEST, Message.CREATE_FAILED);
+    }
   }
 }
 

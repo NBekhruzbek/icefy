@@ -37,6 +37,13 @@ router.get(
   memberController.retrievAuth,
   productController.getProducts,
 );
+
+router.get(
+  "/product/likedProducts",
+  memberController.verifyAuth,
+  productController.getLikedProducts,
+);
+
 router.get(
   "/product/:id",
   memberController.retrievAuth,

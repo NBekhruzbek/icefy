@@ -3,7 +3,11 @@ import { T } from "../libs/types/common";
 import { Request, Response } from "express";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import { AdminRequest, ExtendedRequest } from "../libs/types/member";
-import { ProductInput, ProductInquiry } from "../libs/types/product";
+import {
+  LikedProductInquiry,
+  ProductInput,
+  ProductInquiry,
+} from "../libs/types/product";
 import { ProductCategory, ProductFlavor } from "../libs/enums/product.enum";
 
 const productService = new ProductService();
@@ -120,6 +124,32 @@ productController.updateChosenProduct = async (
     res.status(HttpCode.OK).json({ data: result });
   } catch (err) {
     console.log("ERROR, updateChosenProduct", err);
+    const message =
+      err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
+    res.send(
+      `<script> alert("${message}"); window.location.replace("/admin/product/all") </script>`,
+    );
+  }
+};
+
+productController.getLikedProducts = async (
+  req: ExtendedRequest,
+  res: Response,
+) => {
+  try {
+    console.log("getLikedProducts");
+    const memberId = req.member?._id ?? null;
+    const { page, limit } = req.query;
+    const inquiry: LikedProductInquiry = {
+      page: Number(page),
+      limit: Number(limit),
+    };
+
+    const result = await productService.getLikedProducts(memberId, inquiry);
+
+    res.status(HttpCode.OK).json(result);
+  } catch (err) {
+    console.log("ERROR, getLikedProducts", err);
     const message =
       err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
     res.send(

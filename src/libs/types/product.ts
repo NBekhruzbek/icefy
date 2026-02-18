@@ -63,6 +63,11 @@ export interface ProductInquiry {
   search?: string;
 }
 
+export interface LikedProductInquiry {
+  page: number;
+  limit: number;
+}
+
 export interface StatisticModifier {
   _id: Types.ObjectId;
   targetKey: string;
