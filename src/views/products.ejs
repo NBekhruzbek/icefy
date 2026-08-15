@@ -19,7 +19,7 @@
         <li class="nav-item user-profile-item">
           <div class="profile-wrapper">
             <img
-              src="/<%= member.memberImage %>"
+              src="/admin/<%= member.memberImage %>"
               alt="User Profile"
               class="profile-image"
               id="profileToggle"
@@ -27,7 +27,7 @@
             <div class="profile-dropdown" id="profileDropdown">
               <div class="dropdown-header">
                 <img
-                  src="/<%= member.memberImage %>"
+                  src="/admin/<%= member.memberImage %>"
                   alt="User Profile"
                   class="dropdown-image"
                 />
@@ -78,7 +78,7 @@
               <tbody>
                 <tr>
                   <td><%= key + 1 %></td>
-                  <td><img class="product-image" src="/<%= value.productImages[0] %>" alt=""></td>
+                  <td><img class="product-image" src="/admin/<%= value.productImages[0] %>" alt=""></td>
                   <td><span class="product-name-cell"><%= value.productName %></span></td>
                   <td>
                     <% if (value.productCategory === "CLASSIC") { %>
