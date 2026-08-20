@@ -594,26 +594,193 @@ npm run build
                              src/public →  dist/public
 ```
 
-### PM2
+The server always runs `dist/server.js` in production, and `app.ts` resolves views and static assets from `__dirname` — which means **a build that skipped `extra.js` boots fine but renders nothing**: every admin page fails with a missing-view error and every stylesheet 404s. `npm run build` chains both steps for exactly that reason; never run bare `tsc` on the server.
 
-`process.config.js` runs `dist/server.js` under the name **ICEFY** in cluster mode with `NODE_ENV=production`:
+### Deployment topology
 
-```bash
-pm2 start process.config.js --env production
-pm2 logs ICEFY
-pm2 restart ICEFY
+```mermaid
+flowchart LR
+    SPA["React SPA<br/>icefy.xyz"] -->|"HTTPS"| NGINX
+    ADM["Admin browser<br/>icefy.xyz/admin"] -->|"HTTPS"| NGINX
+    NGINX["Nginx<br/>:80 → :443 · TLS · reverse proxy"] -->|"proxy_pass<br/>HTTP + WebSocket upgrade"| PM2
+
+    subgraph HOST["Application server"]
+        PM2["PM2 · app ICEFY<br/>node dist/server.js — :4003"]
+        DISK[("uploads/<br/>local disk")]
+        PM2 --- DISK
+    end
+
+    PM2 -->|"Mongoose"| DB[("MongoDB<br/>data + sessions collection")]
 ```
 
-### One-command deploy
+One Node process behind Nginx serves everything: REST API, admin SSR, uploaded images, and the Socket.IO connection. There is no separate frontend deployment on this host — the SPA is built and hosted separately and simply talks to this origin.
+
+### What is *not* in the repository
+
+`.gitignore` keeps four things out of git, and each has to be handled on the server:
+
+| Path | Who creates it | Notes |
+|---|---|---|
+| `node_modules/` | `npm i` during deploy | Never copy from your laptop — native builds differ per platform. |
+| `dist/` | `npm run build` during deploy | Always rebuilt on the server; deleting it is harmless. |
+| `.env` / `.env.production` | **You, manually, once** | Not in git by design. A fresh server has no env file, and `MONGO_URL` will be `undefined`. |
+| `uploads/` | Multer at runtime | **User data.** Lives on the server disk only — losing it means every member avatar and product image 404s. |
+
+### Server prerequisites
+
+- Ubuntu (or any Linux) host with a public IP and a domain pointed at it
+- Node.js **18+** — install with `nvm` so upgrades don't need root
+- `npm i -g pm2`
+- MongoDB — Atlas cluster or a local `mongod`
+- Nginx, and `certbot` for TLS
+
+### First deployment (from scratch)
+
+```bash
+# 1 — clone the production branch
+git clone https://github.com/NBekhruzbek/icefy.git
+cd icefy
+git checkout main
+
+# 2 — production environment file (see the variable table in §10)
+nano .env.production
+#   PORT=4003
+#   MONGO_URL=mongodb+srv://<user>:<pass>@<cluster>/icefy
+#   SESSION_SECRET=<long random string>
+#   SECRET_TOKEN=<long random string, different from SESSION_SECRET>
+
+# 3 — upload folders Multer writes into (it does not create them)
+mkdir -p uploads/members uploads/products
+
+# 4 — install and build
+npm i
+npm run build
+
+# 5 — start under PM2 with NODE_ENV=production
+pm2 start process.config.js --env production
+
+# 6 — survive a server reboot
+pm2 save
+pm2 startup        # then run the command it prints, as root
+```
+
+`pm2 save` writes the current process list, and `pm2 startup` installs the systemd unit that replays it on boot. Skipping step 6 is the single most common reason a site is down after an unplanned reboot.
+
+Verify before touching Nginx:
+
+```bash
+curl -I http://127.0.0.1:4003/admin/login     # expect 200
+pm2 logs ICEFY --lines 50                     # expect "MongoDB connection succeed."
+```
+
+### Nginx reverse proxy
+
+`/etc/nginx/sites-available/icefy` → symlink into `sites-enabled/`:
+
+```nginx
+server {
+    listen 80;
+    server_name icefy.xyz www.icefy.xyz;
+
+    # Product and avatar images are uploaded through this proxy.
+    # Multer sets no file-size limit, so Nginx is the only effective cap.
+    client_max_body_size 10M;
+
+    location / {
+        proxy_pass http://127.0.0.1:4003;
+        proxy_http_version 1.1;
+
+        # Required by Socket.IO — without these two headers the
+        # WebSocket handshake fails and the realtime layer never connects.
+        proxy_set_header Upgrade    $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_read_timeout 60s;
+    }
+}
+```
+
+```bash
+sudo ln -s /etc/nginx/sites-available/icefy /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d icefy.xyz -d www.icefy.xyz   # adds the TLS server block
+```
+
+Two values here are not decoration:
+
+- **`client_max_body_size`** — the default is 1 MB. A larger product photo is rejected by Nginx with `413` before Express ever runs, so the admin form appears to fail for no reason.
+- **`Upgrade` / `Connection`** — Socket.IO opens with an HTTP request that asks to be upgraded to a WebSocket. A proxy that drops those headers downgrades every client to long-polling at best.
+
+### PM2 operations
+
+`process.config.js` runs `dist/server.js` as **ICEFY** in cluster mode with `NODE_ENV=production`:
+
+| Command | What it does |
+|---|---|
+| `pm2 start process.config.js --env production` | First launch. Errors with *"Script already launched"* if ICEFY exists. |
+| `pm2 reload ICEFY` | Zero-downtime restart — workers are replaced one by one. |
+| `pm2 restart ICEFY` | Hard restart; short connection drop. |
+| `pm2 startOrReload process.config.js --env production` | Start if absent, reload if present — the safe form for a repeatable deploy script. |
+| `pm2 logs ICEFY` | Live stdout/stderr. `--lines 200` for backlog, `pm2 flush` to truncate. |
+| `pm2 status` / `pm2 monit` | Process table / live CPU + memory. |
+| `pm2 save` | Persist the process list for boot. Re-run after adding or renaming an app. |
+| `pm2 delete ICEFY` | Remove the app entirely (then `pm2 save` again). |
+
+**On scaling `instances`** — sessions live in MongoDB, so admin logins already survive multiple workers and restarts. Socket.IO does not: the `summaryClient` counter in `app.ts` is per-process memory, so with more than one instance each worker counts only its own clients, and clients that reconnect to a different worker break their session. Raising `instances` requires sticky sessions plus a Socket.IO Redis adapter first.
+
+### Releasing an update
 
 `deploy.sh` performs a clean production release on the server:
 
 ```bash
 ./deploy.sh
-# git reset --hard && git checkout main && git pull origin main
-# npm i && npm run build
+# git reset --hard              discard any drift on the server
+# git checkout main
+# git pull origin main
+# npm i
+# npm run build                 tsc + copy views/public
 # pm2 start process.config.js --env production
 ```
+
+`git reset --hard` only touches tracked files — `uploads/` and `.env.production` are untracked, so a deploy never destroys uploaded images or the environment file.
+
+One caveat worth knowing: the last line is `pm2 start`, which succeeds on the *first* release and then fails with **"Script already launched"** on every one after it, leaving the old build running while the script appears to have finished. On a server where ICEFY is already registered, finish the release with:
+
+```bash
+pm2 reload ICEFY                                       # zero-downtime
+# or make the script idempotent:
+pm2 startOrReload process.config.js --env production
+```
+
+The commented-out block at the bottom of `deploy.sh` is the development variant: it tracks `develop` and runs `npm run start:dev` under PM2 with no build step.
+
+### Backups
+
+Everything that cannot be recreated from git is the database and the upload folder:
+
+```bash
+mongodump --uri="$MONGO_URL" --out=/backup/icefy-$(date +%F)
+tar czf /backup/uploads-$(date +%F).tar.gz uploads/
+```
+
+### Production checklist
+
+- [ ] `.env.production` exists on the server, with `SESSION_SECRET` and `SECRET_TOKEN` long, random, and different from each other and from development
+- [ ] `MONGO_URL` points at the production database, with auth enabled and — on Atlas — the server IP allow-listed
+- [ ] `uploads/members` and `uploads/products` exist and are writable by the PM2 user
+- [ ] `npm run build` ran on the server, and `dist/views` + `dist/public` are present
+- [ ] `pm2 save` and `pm2 startup` are done, verified by rebooting once
+- [ ] Nginx sets the `Upgrade`/`Connection` headers and a `client_max_body_size` above your largest image
+- [ ] TLS issued and auto-renewing (`systemctl status certbot.timer`)
+- [ ] Firewall allows only 22/80/443 — port 4003 must not be reachable from outside, since the app itself listens on every interface
+- [ ] `mongodump` and an `uploads/` archive are scheduled
+
+**Known gaps to close before real traffic** — carried in §13 Roadmap: `cors({ origin: true })` reflects whatever origin calls the API; the `accessToken` cookie is set with `httpOnly: false` and no `secure` flag; and behind TLS the app needs `app.set("trust proxy", 1)` before session cookies can be marked `secure`.
 
 ## 12. Design Decisions
 
@@ -1228,26 +1395,194 @@ npm run build
                              src/public →  dist/public
 ```
 
-### PM2
+운영 환경에서는 항상 `dist/server.js`가 실행되며, `app.ts`는 뷰와 정적 자원을 `__dirname` 기준으로 찾습니다. 따라서 **`extra.js`를 건너뛴 빌드는 기동은 되지만 화면이 전혀 나오지 않습니다.** 모든 관리자 페이지가 뷰 누락 에러로 실패하고, 스타일시트는 전부 404가 됩니다. `npm run build`가 두 단계를 묶어 둔 이유가 바로 이것이므로, 서버에서 `tsc`만 단독으로 실행해서는 안 됩니다.
+
+### 배포 구성도
+
+```mermaid
+flowchart LR
+    SPA["React SPA<br/>icefy.xyz"] -->|"HTTPS"| NGINX
+    ADM["관리자 브라우저<br/>icefy.xyz/admin"] -->|"HTTPS"| NGINX
+    NGINX["Nginx<br/>:80 → :443 · TLS · 리버스 프록시"] -->|"proxy_pass<br/>HTTP + WebSocket 업그레이드"| PM2
+
+    subgraph HOST["애플리케이션 서버"]
+        PM2["PM2 · 앱 이름 ICEFY<br/>node dist/server.js — :4003"]
+        DISK[("uploads/<br/>로컬 디스크")]
+        PM2 --- DISK
+    end
+
+    PM2 -->|"Mongoose"| DB[("MongoDB<br/>데이터 + sessions 컬렉션")]
+```
+
+Nginx 뒤의 Node 프로세스 하나가 REST API, 관리자 SSR, 업로드 이미지, Socket.IO 연결을 모두 처리합니다. 이 호스트에 프론트엔드는 배포되지 않으며, SPA는 별도로 빌드·호스팅되어 이 오리진과 통신합니다.
+
+### 저장소에 포함되지 *않는* 것
+
+`.gitignore`가 제외하는 네 가지는 각각 서버에서 따로 처리해야 합니다.
+
+| 경로 | 생성 주체 | 비고 |
+|---|---|---|
+| `node_modules/` | 배포 중 `npm i` | 로컬에서 복사하지 마세요. 네이티브 모듈은 플랫폼마다 다릅니다. |
+| `dist/` | 배포 중 `npm run build` | 항상 서버에서 다시 빌드되므로 삭제해도 무방합니다. |
+| `.env` / `.env.production` | **최초 1회, 직접 생성** | 의도적으로 git에서 제외됩니다. 새 서버에는 env 파일이 없어 `MONGO_URL`이 `undefined`가 됩니다. |
+| `uploads/` | 런타임의 Multer | **사용자 데이터.** 서버 디스크에만 존재하므로, 유실되면 모든 회원 프로필과 상품 이미지가 404가 됩니다. |
+
+### 서버 사전 요구사항
+
+- 공인 IP와 연결된 도메인을 가진 Ubuntu(또는 임의의 Linux) 호스트
+- Node.js **18 이상** — root 권한 없이 버전을 올릴 수 있도록 `nvm` 사용 권장
+- `npm i -g pm2`
+- MongoDB — Atlas 클러스터 또는 로컬 `mongod`
+- Nginx, 그리고 TLS 발급용 `certbot`
+
+### 최초 배포 (처음부터)
+
+```bash
+# 1 — 운영 브랜치 클론
+git clone https://github.com/NBekhruzbek/icefy.git
+cd icefy
+git checkout main
+
+# 2 — 운영 환경 변수 파일 (변수 표는 §10 참고)
+nano .env.production
+#   PORT=4003
+#   MONGO_URL=mongodb+srv://<user>:<pass>@<cluster>/icefy
+#   SESSION_SECRET=<충분히 긴 랜덤 문자열>
+#   SECRET_TOKEN=<SESSION_SECRET과 다른, 충분히 긴 랜덤 문자열>
+
+# 3 — Multer가 기록할 업로드 폴더 (자동 생성되지 않음)
+mkdir -p uploads/members uploads/products
+
+# 4 — 설치 및 빌드
+npm i
+npm run build
+
+# 5 — NODE_ENV=production 으로 PM2 기동
+pm2 start process.config.js --env production
+
+# 6 — 서버 재부팅 후에도 살아남도록 설정
+pm2 save
+pm2 startup        # 출력되는 명령을 root 권한으로 실행
+```
+
+`pm2 save`는 현재 프로세스 목록을 저장하고, `pm2 startup`은 부팅 시 그 목록을 복원하는 systemd 유닛을 설치합니다. 6단계를 건너뛰는 것이 예기치 못한 재부팅 후 서비스가 죽어 있는 가장 흔한 원인입니다.
+
+Nginx 설정 전에 먼저 확인합니다.
+
+```bash
+curl -I http://127.0.0.1:4003/admin/login     # 200 이어야 함
+pm2 logs ICEFY --lines 50                     # "MongoDB connection succeed." 확인
+```
+
+### Nginx 리버스 프록시
+
+`/etc/nginx/sites-available/icefy` 작성 후 `sites-enabled/`에 심볼릭 링크를 겁니다.
+
+```nginx
+server {
+    listen 80;
+    server_name icefy.xyz www.icefy.xyz;
+
+    # 상품·프로필 이미지가 이 프록시를 통해 업로드됩니다.
+    # Multer에 파일 크기 제한이 설정되어 있지 않으므로,
+    # 실질적인 업로드 상한은 Nginx의 이 값 하나뿐입니다.
+    client_max_body_size 10M;
+
+    location / {
+        proxy_pass http://127.0.0.1:4003;
+        proxy_http_version 1.1;
+
+        # Socket.IO에 필수 — 이 두 헤더가 없으면 WebSocket 핸드셰이크가
+        # 실패하고 실시간 계층이 연결되지 않습니다.
+        proxy_set_header Upgrade    $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_read_timeout 60s;
+    }
+}
+```
+
+```bash
+sudo ln -s /etc/nginx/sites-available/icefy /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d icefy.xyz -d www.icefy.xyz   # TLS 서버 블록 자동 추가
+```
+
+여기서 두 값은 장식이 아닙니다.
+
+- **`client_max_body_size`** — 기본값은 1 MB입니다. 그보다 큰 상품 사진은 Express에 도달하기도 전에 Nginx가 `413`으로 거부하므로, 관리자 폼이 아무 이유 없이 실패하는 것처럼 보입니다.
+- **`Upgrade` / `Connection`** — Socket.IO는 WebSocket으로 승격을 요청하는 HTTP 요청으로 연결을 시작합니다. 이 헤더를 누락한 프록시는 모든 클라이언트를 롱 폴링으로 떨어뜨리거나 아예 연결을 끊습니다.
+
+### PM2 운영
 
 `process.config.js`는 `dist/server.js`를 **ICEFY**라는 이름으로, `NODE_ENV=production` 환경의 클러스터 모드로 실행합니다.
 
-```bash
-pm2 start process.config.js --env production
-pm2 logs ICEFY
-pm2 restart ICEFY
-```
+| 명령 | 동작 |
+|---|---|
+| `pm2 start process.config.js --env production` | 최초 기동. ICEFY가 이미 있으면 *"Script already launched"* 오류. |
+| `pm2 reload ICEFY` | 무중단 재시작 — 워커를 순차적으로 교체합니다. |
+| `pm2 restart ICEFY` | 강제 재시작. 짧은 연결 단절이 발생합니다. |
+| `pm2 startOrReload process.config.js --env production` | 없으면 시작, 있으면 리로드 — 반복 실행하는 배포 스크립트에 안전한 형태. |
+| `pm2 logs ICEFY` | 실시간 stdout/stderr. 지난 로그는 `--lines 200`, 정리는 `pm2 flush`. |
+| `pm2 status` / `pm2 monit` | 프로세스 목록 / 실시간 CPU·메모리. |
+| `pm2 save` | 부팅 복원용 프로세스 목록 저장. 앱을 추가·변경하면 다시 실행. |
+| `pm2 delete ICEFY` | 앱 완전 삭제 (이후 `pm2 save` 재실행). |
 
-### 원커맨드 배포
+**`instances` 확장에 대하여** — 세션은 MongoDB에 저장되므로 관리자 로그인은 이미 다중 워커와 재시작에도 유지됩니다. 하지만 Socket.IO는 그렇지 않습니다. `app.ts`의 `summaryClient` 카운터는 프로세스별 메모리이므로, 인스턴스가 둘 이상이면 각 워커가 자기 클라이언트만 세고, 다른 워커로 재연결된 클라이언트는 연결이 끊깁니다. `instances`를 늘리려면 먼저 sticky session과 Socket.IO Redis 어댑터가 필요합니다.
+
+### 업데이트 배포
 
 `deploy.sh`는 서버에서 깨끗한 운영 배포를 수행합니다.
 
 ```bash
 ./deploy.sh
-# git reset --hard && git checkout main && git pull origin main
-# npm i && npm run build
+# git reset --hard              서버에 생긴 변경사항 폐기
+# git checkout main
+# git pull origin main
+# npm i
+# npm run build                 tsc + views/public 복사
 # pm2 start process.config.js --env production
 ```
+
+`git reset --hard`는 추적 중인 파일만 되돌립니다. `uploads/`와 `.env.production`은 추적 대상이 아니므로, 배포로 업로드 이미지나 환경 파일이 사라지는 일은 없습니다.
+
+한 가지 알아 둘 점이 있습니다. 마지막 줄의 `pm2 start`는 *첫* 배포에서만 성공하고, 이후 모든 배포에서는 **"Script already launched"** 오류로 실패합니다. 스크립트는 끝난 것처럼 보이지만 실제로는 이전 빌드가 계속 돌아갑니다. ICEFY가 이미 등록된 서버에서는 다음으로 마무리하세요.
+
+```bash
+pm2 reload ICEFY                                       # 무중단
+# 또는 스크립트 자체를 멱등하게:
+pm2 startOrReload process.config.js --env production
+```
+
+`deploy.sh` 하단의 주석 처리된 블록은 개발 환경용입니다. `develop` 브랜치를 사용하고 빌드 없이 PM2로 `npm run start:dev`를 실행합니다.
+
+### 백업
+
+git으로 복원할 수 없는 것은 데이터베이스와 업로드 폴더뿐입니다.
+
+```bash
+mongodump --uri="$MONGO_URL" --out=/backup/icefy-$(date +%F)
+tar czf /backup/uploads-$(date +%F).tar.gz uploads/
+```
+
+### 운영 배포 체크리스트
+
+- [ ] 서버에 `.env.production`이 존재하며, `SESSION_SECRET`과 `SECRET_TOKEN`이 충분히 길고 랜덤하며 서로 다르고 개발용과도 다른가
+- [ ] `MONGO_URL`이 운영 DB를 가리키고 인증이 활성화되어 있는가 (Atlas라면 서버 IP 허용 목록 등록)
+- [ ] `uploads/members`, `uploads/products`가 존재하고 PM2 실행 사용자에게 쓰기 권한이 있는가
+- [ ] 서버에서 `npm run build`를 실행했고 `dist/views`, `dist/public`이 생성되었는가
+- [ ] `pm2 save`와 `pm2 startup`을 완료했고, 실제 재부팅으로 검증했는가
+- [ ] Nginx에 `Upgrade`/`Connection` 헤더와 최대 이미지 크기보다 큰 `client_max_body_size`가 설정되어 있는가
+- [ ] TLS가 발급되고 자동 갱신되는가 (`systemctl status certbot.timer`)
+- [ ] 방화벽이 22/80/443만 허용하는가 — 앱이 모든 인터페이스에서 수신하므로 4003 포트가 외부에 노출되어서는 안 됨
+- [ ] `mongodump`와 `uploads/` 아카이브가 정기 실행되도록 예약되어 있는가
+
+**실제 트래픽을 받기 전에 보완해야 할 항목** — §13 향후 개선 계획에 포함되어 있습니다. `cors({ origin: true })`는 요청한 오리진을 그대로 반사하며, `accessToken` 쿠키는 `httpOnly: false`에 `secure` 플래그가 없습니다. 또한 TLS 뒤에서 세션 쿠키에 `secure`를 적용하려면 `app.set("trust proxy", 1)`이 선행되어야 합니다.
 
 ## 12. 설계 의사결정
 
